@@ -58,8 +58,8 @@
 <script>
 (()=>{
 const canvas=document.getElementById('maze'),ctx=canvas.getContext('2d'),mazePage=document.getElementById('mazePage'),completePage=document.getElementById('completePage'),bottomBar=document.getElementById('bottomBar'),modal=document.getElementById('modal'),textarea=document.getElementById('gratitude'),welcomeModal=document.getElementById('welcomeModal'),toast=document.getElementById('toast'),garden=document.getElementById('garden'),emptyNote=document.getElementById('emptyNote'),countEl=document.getElementById('leafCount');
-const catImg=new Image(),leafImg=new Image(),flowerImg=new Image();catImg.src='caterpillar.png';leafImg.src='leaf.png';flowerImg.src='flower.png';document.getElementById('leafIcon').src='leaf.png';
-const COLS=15,ROWS=9,CELL=68;let seed=0,chunks=new Map(),player={x:0,y:4},facing='right',paused=false,activeLeaf=null,collected=new Set(),gratitude=new Map(),leafCells=new Set(),flowerCells=new Set(),collectedFlowers=new Set();
+const catImg=new Image(),leafImg=new Image(),flowerImg=new Image(),ginkgoImg=new Image();catImg.src='caterpillar.png';leafImg.src='leaf.png';flowerImg.src='flower.png';ginkgoImg.src='ginkgo.png';document.getElementById('leafIcon').src='leaf.png';
+const COLS=15,ROWS=9,CELL=68;let seed=0,chunks=new Map(),player={x:0,y:4},facing='right',paused=false,activeLeaf=null,activeCollectibleType=null,collected=new Set(),gratitude=new Map(),leafCells=new Set(),flowerCells=new Set(),ginkgoCells=new Set(),collectedFlowers=new Set(),collectedGinkgo=new Set();
 const DIRS={up:{dx:0,dy:-1,wall:0,opp:2},right:{dx:1,dy:0,wall:1,opp:3},down:{dx:0,dy:1,wall:2,opp:0},left:{dx:-1,dy:0,wall:3,opp:1}};
 function randFor(n){let s=(Math.sin((n+seed)*127.31)*43758.5453)>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
 function makeChunk(cx,entry){const r=randFor(cx*1009+17),walls=Array.from({length:COLS},()=>Array.from({length:ROWS},()=>[1,1,1,1])),seen=Array.from({length:COLS},()=>Array(ROWS).fill(false)),stack=[[0,entry]];seen[0][entry]=true;while(stack.length){const[x,y]=stack[stack.length-1],choices=[];for(const d of Object.values(DIRS)){const nx=x+d.dx,ny=y+d.dy;if(nx>=0&&nx<COLS&&ny>=0&&ny<ROWS&&!seen[nx][ny])choices.push([nx,ny,d])}if(!choices.length){stack.pop();continue}const[nx,ny,d]=choices[Math.floor(r()*choices.length)];walls[x][y][d.wall]=0;walls[nx][ny][d.opp]=0;seen[nx][ny]=true;stack.push([nx,ny])}let y=entry;for(let x=0;x<COLS-1;x++){if(r()<.35){const ny=Math.max(0,Math.min(ROWS-1,y+(r()<.5?-1:1)));if(ny!==y){const d=ny>y?DIRS.down:DIRS.up;walls[x][y][d.wall]=0;walls[x][ny][d.opp]=0;y=ny}}walls[x][y][1]=0;walls[x+1][y][3]=0}walls[0][entry][3]=0;walls[COLS-1][y][1]=0;return{walls,entry,exit:y}}
@@ -74,6 +74,16 @@ while(flowerAdded<flowerCount&&flowerTries<80){
   for(const k of flowerCells){const[o,p]=k.split(',').map(Number);if(Math.abs(o-fgx)+Math.abs(p-fy)<5){close=true;break}}
   if(!close){flowerCells.add(fkey);flowerAdded++}
 }
+const ginkgoCount=r()<0.55?1:0;
+let ginkgoTries=0,ginkgoAdded=0;
+while(ginkgoAdded<ginkgoCount&&ginkgoTries<80){
+  ginkgoTries++;
+  const gx=Math.floor(r()*COLS),gy=Math.floor(r()*ROWS),ggx=cx*COLS+gx,gkey=ggx+','+gy;
+  if(ggx===0&&gy===4||leafCells.has(gkey)||flowerCells.has(gkey)||ginkgoCells.has(gkey))continue;
+  let close=false;
+  for(const k of ginkgoCells){const[o,p]=k.split(',').map(Number);if(Math.abs(o-ggx)+Math.abs(p-gy)<5){close=true;break}}
+  if(!close){ginkgoCells.add(gkey);ginkgoAdded++}
+}
 return c}
 function canMove(dir){const d=DIRS[dir],nx=player.x+d.dx,ny=player.y+d.dy;if(ny<0||ny>=ROWS)return false;const cx=Math.floor(player.x/COLS),lx=((player.x%COLS)+COLS)%COLS,c=getChunk(cx);if(c.walls[lx][player.y][d.wall])return false;if(d.dx!==0){const ncx=Math.floor(nx/COLS),nlx=((nx%COLS)+COLS)%COLS,nc=getChunk(ncx);if(nc.walls[nlx][ny][d.opp])return false}return true}
 function move(dir){if(bgMusic.paused)bgMusic.play().catch(()=>{});if(paused||!canMove(dir))return;facing=dir;const d=DIRS[dir];player.x+=d.dx;player.y+=d.dy;getChunk(Math.floor(player.x/COLS)+1);checkLeaf();draw()}
@@ -81,25 +91,36 @@ function collectibleAt(x,y){
   const k=x+','+y;
   if(!collected.has(k)&&leafCells.has(k))return {key:k,type:'leaf'};
   if(!collectedFlowers.has(k)&&flowerCells.has(k))return {key:k,type:'flower'};
+  if(!collectedGinkgo.has(k)&&ginkgoCells.has(k))return {key:k,type:'ginkgo'};
   return null;
 }
 function checkLeaf(){
   const item=collectibleAt(player.x,player.y);
-  if(item){activeLeaf=item.key;paused=true;textarea.value='';modal.classList.add('show');setTimeout(()=>textarea.focus(),40)}
+  if(item){
+    activeLeaf=item.key;
+    activeCollectibleType=item.type;
+    paused=true;
+    textarea.value='';
+    document.getElementById('leafIcon').src=item.type==='flower'?'flower.png':item.type==='ginkgo'?'ginkgo.png':'leaf.png';
+    document.querySelector('#modal h2').textContent=item.type==='flower'?'A flower for you':'A leaf for you';
+    modal.classList.add('show');
+    setTimeout(()=>textarea.focus(),40);
+  }
 }
-function closePrompt(save){if(!activeLeaf)return;if(save&&!textarea.value.trim()){textarea.focus();return}if(save){if(leafCells.has(activeLeaf))collected.add(activeLeaf);if(flowerCells.has(activeLeaf))collectedFlowers.add(activeLeaf);const t=textarea.value.trim();if(t)gratitude.set(activeLeaf,t)}modal.classList.remove('show');paused=false;activeLeaf=null;if(save){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1100)}draw()}
+function closePrompt(save){if(!activeLeaf)return;if(save&&!textarea.value.trim()){textarea.focus();return}if(save){if(leafCells.has(activeLeaf))collected.add(activeLeaf);if(flowerCells.has(activeLeaf))collectedFlowers.add(activeLeaf);if(ginkgoCells.has(activeLeaf))collectedGinkgo.add(activeLeaf);const t=textarea.value.trim();if(t)gratitude.set(activeLeaf,t)}modal.classList.remove('show');paused=false;activeLeaf=null;activeCollectibleType=null;document.getElementById('leafIcon').src='leaf.png';document.querySelector('#modal h2').textContent='A leaf for you';if(save){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1100)}draw()}
 function camera(){return{x:Math.max(0,player.x*CELL+CELL/2-canvas.width/2),y:player.y*CELL+CELL/2-canvas.height/2}}
 function draw(){ctx.fillStyle='#f6f3e7';ctx.fillRect(0,0,canvas.width,canvas.height);const cam=camera(),minGX=Math.floor(cam.x/CELL)-2,maxGX=Math.ceil((cam.x+canvas.width)/CELL)+2,minY=Math.max(0,Math.floor(cam.y/CELL)-2),maxY=Math.min(ROWS-1,Math.ceil((cam.y+canvas.height)/CELL)+2);ctx.save();ctx.strokeStyle='#b7c9a7';ctx.lineWidth=15;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();for(let gx=minGX;gx<=maxGX;gx++){const cx=Math.floor(gx/COLS),lx=((gx%COLS)+COLS)%COLS,c=getChunk(cx);for(let y=minY;y<=maxY;y++){const w=c.walls[lx][y],x0=gx*CELL-cam.x,y0=y*CELL-cam.y,x1=x0+CELL,y1=y0+CELL;if(w[0]&&y>0){ctx.moveTo(x0,y0);ctx.lineTo(x1,y0)}if(w[1]&&gx>0){ctx.moveTo(x1,y0);ctx.lineTo(x1,y1)}if(w[2]&&y<ROWS-1){ctx.moveTo(x0,y1);ctx.lineTo(x1,y1)}if(w[3]&&gx>0){ctx.moveTo(x0,y0);ctx.lineTo(x0,y1)}}}ctx.stroke();ctx.beginPath();const topY=-cam.y,bottomY=ROWS*CELL-cam.y,leftX=-cam.x;if(topY>=-15&&topY<=canvas.height+15){ctx.moveTo(0,topY);ctx.lineTo(canvas.width,topY)}if(bottomY>=-15&&bottomY<=canvas.height+15){ctx.moveTo(0,bottomY);ctx.lineTo(canvas.width,bottomY)}if(leftX>=-15&&leftX<=canvas.width+15){ctx.moveTo(leftX,0);ctx.lineTo(leftX,canvas.height)}ctx.stroke();ctx.restore();for(let gx=minGX;gx<=maxGX;gx++)for(let y=minY;y<=maxY;y++){
   const k=gx+','+y,px=gx*CELL+CELL/2-cam.x,py=y*CELL+CELL/2-cam.y;
   if(!collected.has(k)&&leafCells.has(k)){ctx.save();ctx.translate(px,py);ctx.rotate(((gx*13+y*7)%9-4)*.07);ctx.globalAlpha=.9;ctx.drawImage(leafImg,-24,-24,48,48);ctx.restore()}
   if(!collectedFlowers.has(k)&&flowerCells.has(k)){ctx.save();ctx.translate(px,py);ctx.rotate(((gx*17+y*11)%9-4)*.05);ctx.globalAlpha=.96;ctx.drawImage(flowerImg,-24,-24,48,48);ctx.restore()}
+  if(!collectedGinkgo.has(k)&&ginkgoCells.has(k)){ctx.save();ctx.translate(px,py);ctx.rotate(((gx*19+y*13)%9-4)*.035);ctx.globalAlpha=.96;ctx.drawImage(ginkgoImg,-26,-30,52,60);ctx.restore()}
 }const x=player.x*CELL+CELL/2-cam.x,y=player.y*CELL+CELL/2-cam.y,angle={right:0,left:Math.PI,down:Math.PI/2,up:-Math.PI/2}[facing],ratio=catImg.width/catImg.height,w=60*ratio;ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.drawImage(catImg,-w/2,-30,w,60);ctx.restore()}
-function renderGarden(){const count=collected.size+collectedFlowers.size;countEl.textContent=count===1?'1 thing you noticed along the way':count+' things you noticed along the way';emptyNote.style.display=count?'none':'grid';garden.querySelectorAll('.finish-leaf').forEach(e=>e.remove());const thoughts=document.getElementById('thoughts');thoughts.innerHTML='';[...collected].map(k=>gratitude.get(k)).filter(Boolean).forEach(t=>{const d=document.createElement('div');d.className='thought';d.textContent=t;thoughts.appendChild(d)});if(!count)return;const allItems=[...collected].map(k=>({key:k,type:'leaf'})).concat([...collectedFlowers].map(k=>({key:k,type:'flower'})));
+function renderGarden(){const count=collected.size+collectedFlowers.size+collectedGinkgo.size;countEl.textContent=count===1?'1 thing you noticed along the way':count+' things you noticed along the way';emptyNote.style.display=count?'none':'grid';garden.querySelectorAll('.finish-leaf').forEach(e=>e.remove());const thoughts=document.getElementById('thoughts');thoughts.innerHTML='';[...collected].map(k=>gratitude.get(k)).filter(Boolean).forEach(t=>{const d=document.createElement('div');d.className='thought';d.textContent=t;thoughts.appendChild(d)});if(!count)return;const allItems=[...collected].map(k=>({key:k,type:'leaf'})).concat([...collectedFlowers].map(k=>({key:k,type:'flower'})),[...collectedGinkgo].map(k=>({key:k,type:'ginkgo'})));
 const total=allItems.length,size=Math.max(42,Math.min(72,78-total*.55));let left=total,index=0,ring=0;
 while(left>0){const n=Math.min(left,ring===0?8:Math.min(18,8+ring*6)),radius=62+ring*43;
-for(let j=0;j<n;j++){const item=allItems[index],a=-Math.PI/2+(j/n)*Math.PI*2+(ring%2?Math.PI/n:0),el=document.createElement('img');el.className='finish-leaf';el.src=item.type==='flower'?'flower.png':'leaf.png';el.alt=item.type==='flower'?'Gratitude flower':'Gratitude leaf';el.title=gratitude.get(item.key)||'';const itemSize=item.type==='flower'?size*1.18:size;el.style.width=itemSize+'px';el.style.height=itemSize+'px';el.style.left=`calc(50% + ${Math.cos(a)*radius}px - ${itemSize/2}px)`;el.style.top=`calc(50% + ${Math.sin(a)*radius}px - ${itemSize/2}px)`;el.style.transform=`rotate(${a+Math.PI/2}rad)`;garden.appendChild(el);index++}left-=n;ring++}
+for(let j=0;j<n;j++){const item=allItems[index],a=-Math.PI/2+(j/n)*Math.PI*2+(ring%2?Math.PI/n:0),el=document.createElement('img');el.className='finish-leaf';el.src=item.type==='flower'?'flower.png':item.type==='ginkgo'?'ginkgo.png':'leaf.png';el.alt=item.type==='flower'?'Gratitude flower':item.type==='ginkgo'?'Gratitude ginkgo leaf':'Gratitude leaf';el.title=gratitude.get(item.key)||'';const itemSize=item.type==='flower'?size*1.18:size;el.style.width=itemSize+'px';el.style.height=itemSize+'px';el.style.left=`calc(50% + ${Math.cos(a)*radius}px - ${itemSize/2}px)`;el.style.top=`calc(50% + ${Math.sin(a)*radius}px - ${itemSize/2}px)`;el.style.transform=`rotate(${a+Math.PI/2}rad)`;garden.appendChild(el);index++}left-=n;ring++}
 }
-function reset(showWelcome=false){seed=Math.floor(Math.random()*1e9);chunks.clear();collected.clear();gratitude.clear();leafCells.clear();flowerCells.clear();collectedFlowers.clear();player={x:0,y:4};facing='right';paused=false;activeLeaf=null;modal.classList.remove('show');welcomeModal.classList.toggle('show',showWelcome);getChunk(0);getChunk(1);getChunk(2);getChunk(3);showMaze();draw()}
+function reset(showWelcome=false){seed=Math.floor(Math.random()*1e9);chunks.clear();collected.clear();gratitude.clear();leafCells.clear();flowerCells.clear();ginkgoCells.clear();collectedFlowers.clear();collectedGinkgo.clear();player={x:0,y:4};facing='right';paused=false;activeLeaf=null;activeCollectibleType=null;modal.classList.remove('show');document.getElementById('leafIcon').src='leaf.png';document.querySelector('#modal h2').textContent='A leaf for you';welcomeModal.classList.toggle('show',showWelcome);getChunk(0);getChunk(1);getChunk(2);getChunk(3);showMaze();draw()}
 function showMaze(){completePage.classList.remove('show');mazePage.style.display='block';bottomBar.style.display='flex'}function showDone(){if(paused)return;mazePage.style.display='none';bottomBar.style.display='none';completePage.classList.add('show');renderGarden()}
 document.getElementById('skip').onclick=()=>closePrompt(false);document.getElementById('save').onclick=()=>closePrompt(true);const bgMusic=document.getElementById('bgMusic');
 bgMusic.volume=0.35;
@@ -108,7 +129,7 @@ document.getElementById('beginMaze').onclick=()=>{
   welcomeModal.classList.remove('show');
 };document.querySelectorAll('.arrow').forEach(b=>b.onclick=()=>move(b.dataset.dir));document.querySelectorAll('[data-mobile-dir]').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();move(b.dataset.mobileDir)}));window.addEventListener('keydown',e=>{const m={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',W:'up',a:'left',A:'left',s:'down',S:'down',d:'right',D:'right'};if(m[e.key]){e.preventDefault();move(m[e.key])}if(e.key==='Enter'&&paused&&modal.classList.contains('show')&&!e.shiftKey){e.preventDefault();closePrompt(true)}if(e.key==='Escape'&&paused)closePrompt(false)});document.getElementById('newMaze').onclick=()=>reset(false);document.getElementById('newFromDone').onclick=()=>reset(false);document.getElementById('backToMaze').onclick=showMaze;document.getElementById('doneMaze').onclick=showDone;reset(true);
 catImg.onload=draw;
-leafImg.onload=draw;flowerImg.onload=draw;
+leafImg.onload=draw;flowerImg.onload=draw;ginkgoImg.onload=draw;
 })();
 </script>
 </body>
