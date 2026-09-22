@@ -59,7 +59,7 @@
 <script>
 (()=>{
 const canvas=document.getElementById('maze'),ctx=canvas.getContext('2d'),mazePage=document.getElementById('mazePage'),completePage=document.getElementById('completePage'),bottomBar=document.getElementById('bottomBar'),modal=document.getElementById('modal'),textarea=document.getElementById('gratitude'),welcomeModal=document.getElementById('welcomeModal'),toast=document.getElementById('toast'),garden=document.getElementById('garden'),emptyNote=document.getElementById('emptyNote'),countEl=document.getElementById('leafCount');
-const catImg=new Image(),leafImg=new Image(),flowerImg=new Image(),ginkgoImg=new Image(),oakImg=new Image(),grassImg=new Image();catImg.src='caterpillar.png';leafImg.src='leaf.png';flowerImg.src='flower.png';ginkgoImg.src='ginkgo.png';oakImg.src='oak.png';grassImg.src='grass-texture.jpg';document.getElementById('leafIcon').src='leaf.png';
+const leafImg=new Image(),flowerImg=new Image(),ginkgoImg=new Image(),oakImg=new Image(),grassImg=new Image();leafImg.src='leaf.png';flowerImg.src='flower.png';ginkgoImg.src='ginkgo.png';oakImg.src='oak.png';grassImg.src='grass-texture.jpg';document.getElementById('leafIcon').src='leaf.png';
 const COLS=15,ROWS=9,CELL=68;let seed=0,chunks=new Map(),player={x:0,y:4},facing='right',paused=false,activeLeaf=null,activeCollectibleType=null,collected=new Set(),gratitude=new Map(),leafCells=new Set(),flowerCells=new Set(),ginkgoCells=new Set(),oakCells=new Set(),collectedFlowers=new Set(),collectedGinkgo=new Set(),collectedOak=new Set();
 const DIRS={up:{dx:0,dy:-1,wall:0,opp:2},right:{dx:1,dy:0,wall:1,opp:3},down:{dx:0,dy:1,wall:2,opp:0},left:{dx:-1,dy:0,wall:3,opp:1}};
 function randFor(n){let s=(Math.sin((n+seed)*127.31)*43758.5453)>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
@@ -127,7 +127,112 @@ function draw(){ctx.fillStyle='#f6f3e7';ctx.fillRect(0,0,canvas.width,canvas.hei
   if(!collectedFlowers.has(k)&&flowerCells.has(k)&&flowerImg.complete&&flowerImg.naturalWidth){ctx.save();ctx.translate(px,py);ctx.rotate(((gx*17+y*11)%9-4)*.05);ctx.globalAlpha=.96;ctx.drawImage(flowerImg,-24,-24,48,48);ctx.restore()}
   if(!collectedGinkgo.has(k)&&ginkgoCells.has(k)&&ginkgoImg.complete&&ginkgoImg.naturalWidth){ctx.save();ctx.translate(px,py);ctx.rotate(((gx*19+y*13)%9-4)*.035);ctx.globalAlpha=.96;ctx.drawImage(ginkgoImg,-26,-30,52,60);ctx.restore()}
   if(!collectedOak.has(k)&&oakCells.has(k)&&oakImg.complete&&oakImg.naturalWidth){ctx.save();ctx.translate(px,py);ctx.rotate(((gx*23+y*17)%9-4)*.035);ctx.globalAlpha=.96;ctx.drawImage(oakImg,-25,-30,50,60);ctx.restore()}
-}const x=player.x*CELL+CELL/2-cam.x,y=player.y*CELL+CELL/2-cam.y,angle={right:0,left:Math.PI,down:Math.PI/2,up:-Math.PI/2}[facing];if(catImg.complete&&catImg.naturalWidth>0&&catImg.naturalHeight>0){const ratio=catImg.naturalWidth/catImg.naturalHeight,w=70*ratio;ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.drawImage(catImg,-w/2,-35,w,70);ctx.restore()}}
+}
+function drawCaterpillar(x,y,facing){
+  const angle={right:0,left:Math.PI,down:Math.PI/2,up:-Math.PI/2}[facing];
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(angle);
+
+  // Soft shadow
+  ctx.save();
+  ctx.translate(0,5);
+  ctx.globalAlpha=.16;
+  ctx.fillStyle='#35523a';
+  ctx.beginPath();
+  ctx.ellipse(0,0,29,8,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  // Tiny legs
+  ctx.strokeStyle='#49633e';
+  ctx.lineWidth=2.2;
+  ctx.lineCap='round';
+  [[-19,9,-22,14],[-7,10,-9,15],[6,10,4,15],[18,8,16,13]].forEach(p=>{
+    ctx.beginPath();
+    ctx.moveTo(p[0],p[1]);
+    ctx.lineTo(p[2],p[3]);
+    ctx.stroke();
+  });
+
+  // Body segments
+  const segments=[
+    {x:-20,r:8,fill:'#b7d77b'},
+    {x:-9,r:9,fill:'#9dcc70'},
+    {x:3,r:9,fill:'#b7d77b'},
+    {x:14,r:10,fill:'#a7cf72'}
+  ];
+
+  segments.forEach(s=>{
+    ctx.fillStyle=s.fill;
+    ctx.strokeStyle='#5d7b49';
+    ctx.lineWidth=1.6;
+    ctx.beginPath();
+    ctx.arc(s.x,0,s.r,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+  });
+
+  // Little decorative dots
+  ctx.fillStyle='rgba(255,255,255,.55)';
+  [[-21,-3],[-10,-4],[3,-4],[14,-4]].forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p[0],p[1],1.8,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  // Head
+  ctx.fillStyle='#c9df82';
+  ctx.strokeStyle='#557444';
+  ctx.lineWidth=1.8;
+  ctx.beginPath();
+  ctx.arc(24,0,11,0,Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Antennae
+  ctx.strokeStyle='#557444';
+  ctx.lineWidth=1.8;
+  ctx.beginPath();
+  ctx.moveTo(20,-9);
+  ctx.quadraticCurveTo(17,-16,13,-17);
+  ctx.moveTo(27,-9);
+  ctx.quadraticCurveTo(30,-16,34,-15);
+  ctx.stroke();
+
+  ctx.fillStyle='#f3c85b';
+  ctx.beginPath();
+  ctx.arc(13,-17,2.3,0,Math.PI*2);
+  ctx.arc(34,-15,2.3,0,Math.PI*2);
+  ctx.fill();
+
+  // Eyes
+  ctx.fillStyle='#fffdf4';
+  ctx.beginPath();
+  ctx.arc(20,-3,3.2,0,Math.PI*2);
+  ctx.arc(27,-3,3.2,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle='#314832';
+  ctx.beginPath();
+  ctx.arc(21,-3,1.3,0,Math.PI*2);
+  ctx.arc(26,-3,1.3,0,Math.PI*2);
+  ctx.fill();
+
+  // Tiny smile
+  ctx.strokeStyle='#536b43';
+  ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.arc(24,2,4,0.15,1.45);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+const x=player.x*CELL+CELL/2-cam.x,
+      y=player.y*CELL+CELL/2-cam.y;
+drawCaterpillar(x,y,facing)
+}
 function renderGarden(){const count=collected.size+collectedFlowers.size+collectedGinkgo.size+collectedOak.size;countEl.textContent=count===1?'1 thing you noticed along the way':count+' things you noticed along the way';emptyNote.style.display=count?'none':'grid';garden.querySelectorAll('.finish-leaf').forEach(e=>e.remove());const thoughts=document.getElementById('thoughts');thoughts.innerHTML='';let number=1;gratitude.forEach(t=>{const d=document.createElement('div');d.className='thought';d.dataset.number=number+'.';d.textContent=t;thoughts.appendChild(d);number++});if(!count)return;const allItems=[...collected].map(k=>({key:k,type:'leaf'})).concat([...collectedFlowers].map(k=>({key:k,type:'flower'})),[...collectedGinkgo].map(k=>({key:k,type:'ginkgo'})));
 const total=allItems.length,size=Math.max(42,Math.min(72,78-total*.55));let left=total,index=0,ring=0;
 while(left>0){const n=Math.min(left,ring===0?8:Math.min(18,8+ring*6)),radius=62+ring*43;
@@ -354,7 +459,6 @@ document.getElementById('beginMaze').onclick=()=>{
   welcomeModal.classList.remove('show');
 };document.querySelectorAll('.arrow').forEach(b=>b.onclick=()=>move(b.dataset.dir));document.querySelectorAll('[data-mobile-dir]').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();move(b.dataset.mobileDir)}));window.addEventListener('keydown',e=>{const m={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',W:'up',a:'left',A:'left',s:'down',S:'down',d:'right',D:'right'};if(m[e.key]){e.preventDefault();move(m[e.key])}if(e.key==='Enter'&&paused&&modal.classList.contains('show')&&!e.shiftKey){e.preventDefault();closePrompt(true)}if(e.key==='Escape'&&paused)closePrompt(false)});document.getElementById('downloadJpg').onclick=downloadGardenJpg;document.getElementById('downloadPdf').onclick=downloadGardenPdf;document.getElementById('newMaze').onclick=()=>reset(false);document.getElementById('newFromDone').onclick=()=>reset(false);document.getElementById('backToMaze').onclick=showMaze;document.getElementById('doneMaze').onclick=showDone;reset(true);
 window.addEventListener('resize',()=>{resizeCanvas();draw()});
-catImg.onload=draw;
 leafImg.onload=draw;flowerImg.onload=draw;ginkgoImg.onload=draw;oakImg.onload=draw;grassImg.onload=draw;
 })();
 </script>
