@@ -60,7 +60,7 @@
 <script>
 (()=>{
 const canvas=document.getElementById('maze'),ctx=canvas.getContext('2d'),mazePage=document.getElementById('mazePage'),completePage=document.getElementById('completePage'),bottomBar=document.getElementById('bottomBar'),modal=document.getElementById('modal'),textarea=document.getElementById('gratitude'),welcomeModal=document.getElementById('welcomeModal'),toast=document.getElementById('toast'),garden=document.getElementById('garden'),emptyNote=document.getElementById('emptyNote'),countEl=document.getElementById('leafCount');
-const catImg=new Image(),leafImg=new Image(),flowerImg=new Image(),ginkgoImg=new Image(),grassImg=new Image();catImg.src='caterpillar.png';leafImg.src='leaf.png';flowerImg.src='flower.png';ginkgoImg.src='ginkgo.png';grassImg.src='grass-texture.jpg';document.getElementById('leafIcon').src='leaf.png';
+const catImg=new Image(),leafImg=new Image(),flowerImg=new Image(),ginkgoImg=new Image(),grassImg=new Image();catImg.src='caterpillar.png';leafImg.src='leaf.png';flowerImg.src='flower.png';ginkgoImg.src='ginkgo.png';grassImg.src='grass-texture2.jpg';document.getElementById('leafIcon').src='leaf.png';
 const COLS=15,ROWS=9,CELL=68;let seed=0,chunks=new Map(),player={x:0,y:4},facing='right',paused=false,activeLeaf=null,activeCollectibleType=null,collected=new Set(),gratitude=new Map(),leafCells=new Set(),flowerCells=new Set(),ginkgoCells=new Set(),collectedFlowers=new Set(),collectedGinkgo=new Set();
 const DIRS={up:{dx:0,dy:-1,wall:0,opp:2},right:{dx:1,dy:0,wall:1,opp:3},down:{dx:0,dy:1,wall:2,opp:0},left:{dx:-1,dy:0,wall:3,opp:1}};
 function randFor(n){let s=(Math.sin((n+seed)*127.31)*43758.5453)>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
