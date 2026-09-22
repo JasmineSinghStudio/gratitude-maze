@@ -127,7 +127,7 @@ function draw(){ctx.fillStyle='#f6f3e7';ctx.fillRect(0,0,canvas.width,canvas.hei
   if(!collectedFlowers.has(k)&&flowerCells.has(k)&&flowerImg.complete&&flowerImg.naturalWidth){ctx.save();ctx.translate(px,py);ctx.rotate(((gx*17+y*11)%9-4)*.05);ctx.globalAlpha=.96;ctx.drawImage(flowerImg,-24,-24,48,48);ctx.restore()}
   if(!collectedGinkgo.has(k)&&ginkgoCells.has(k)&&ginkgoImg.complete&&ginkgoImg.naturalWidth){ctx.save();ctx.translate(px,py);ctx.rotate(((gx*19+y*13)%9-4)*.035);ctx.globalAlpha=.96;ctx.drawImage(ginkgoImg,-26,-30,52,60);ctx.restore()}
   if(!collectedOak.has(k)&&oakCells.has(k)&&oakImg.complete&&oakImg.naturalWidth){ctx.save();ctx.translate(px,py);ctx.rotate(((gx*23+y*17)%9-4)*.035);ctx.globalAlpha=.96;ctx.drawImage(oakImg,-25,-30,50,60);ctx.restore()}
-}const x=player.x*CELL+CELL/2-cam.x,y=player.y*CELL+CELL/2-cam.y,angle={right:0,left:Math.PI,down:Math.PI/2,up:-Math.PI/2}[facing];if(catImg.complete&&catImg.naturalWidth>0&&catImg.naturalHeight>0){const ratio=catImg.naturalWidth/catImg.naturalHeight,w=50*ratio;ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.drawImage(catImg,-w/2,-30,w,50);ctx.restore()}}
+}const x=player.x*CELL+CELL/2-cam.x,y=player.y*CELL+CELL/2-cam.y,angle={right:0,left:Math.PI,down:Math.PI/2,up:-Math.PI/2}[facing];if(catImg.complete&&catImg.naturalWidth>0&&catImg.naturalHeight>0){const ratio=catImg.naturalWidth/catImg.naturalHeight,w=70*ratio;ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.drawImage(catImg,-w/2,-35,w,70);ctx.restore()}}
 function renderGarden(){const count=collected.size+collectedFlowers.size+collectedGinkgo.size+collectedOak.size;countEl.textContent=count===1?'1 thing you noticed along the way':count+' things you noticed along the way';emptyNote.style.display=count?'none':'grid';garden.querySelectorAll('.finish-leaf').forEach(e=>e.remove());const thoughts=document.getElementById('thoughts');thoughts.innerHTML='';let number=1;gratitude.forEach(t=>{const d=document.createElement('div');d.className='thought';d.dataset.number=number+'.';d.textContent=t;thoughts.appendChild(d);number++});if(!count)return;const allItems=[...collected].map(k=>({key:k,type:'leaf'})).concat([...collectedFlowers].map(k=>({key:k,type:'flower'})),[...collectedGinkgo].map(k=>({key:k,type:'ginkgo'})));
 const total=allItems.length,size=Math.max(42,Math.min(72,78-total*.55));let left=total,index=0,ring=0;
 while(left>0){const n=Math.min(left,ring===0?8:Math.min(18,8+ring*6)),radius=62+ring*43;
@@ -146,25 +146,205 @@ function loadImage(src){
   return new Promise(resolve=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>resolve(null);img.src=src;});
 }
 async function makeGardenExportCanvas(){
-  const out=document.createElement('canvas');out.width=1600;out.height=1000;
+  const entries=[...gratitude.entries()];
+
+  const out=document.createElement('canvas');
+  out.width=1600;
   const c=out.getContext('2d');
-  const bg=c.createLinearGradient(0,0,0,out.height);bg.addColorStop(0,'#edf3e5');bg.addColorStop(.58,'#dce9d5');bg.addColorStop(1,'#cbdcc2');c.fillStyle=bg;c.fillRect(0,0,out.width,out.height);
-  const glow=c.createRadialGradient(800,120,20,800,120,430);glow.addColorStop(0,'rgba(255,248,205,.72)');glow.addColorStop(1,'rgba(255,248,205,0)');c.fillStyle=glow;c.fillRect(0,0,out.width,520);
-  c.fillStyle='#36543d';c.textAlign='center';c.font='500 52px "Trebuchet MS",Arial,sans-serif';c.fillText('Your little garden',640,72);c.font='italic 24px "Trebuchet MS",Arial,sans-serif';c.fillStyle='#536955';c.fillText('The things you noticed along the way.',640,108);
-  const count=getAllCollectedItems().length;c.font='600 18px Arial,sans-serif';c.fillStyle='#4b674f';c.fillText(count+(count===1?' thing you noticed along the way':' things you noticed along the way'),640,145);
-  c.strokeStyle='rgba(104,132,97,.18)';c.lineWidth=2;c.beginPath();c.arc(610,515,250,0,Math.PI*2);c.stroke();
-  const items=getExportItems();const total=items.length,size=Math.max(42,Math.min(78,82-total*.55));let left=total,index=0,ring=0;
-  const imgs={leaf:await loadImage('leaf.png'),flower:await loadImage('flower.png'),ginkgo:await loadImage('ginkgo.png'),oak:await loadImage('oak.png'),butterfly:await loadImage('butterfly.png')};
-  while(left>0){const n=Math.min(left,ring===0?8:Math.min(18,8+ring*6)),radius=62+ring*43;for(let j=0;j<n;j++){const item=items[index],a=-Math.PI/2+(j/n)*Math.PI*2+(ring%2?Math.PI/n:0),img=imgs[item.type],itemSize=item.type==='flower'?size*1.18:size;const x=610+Math.cos(a)*radius,y=515+Math.sin(a)*radius;if(img){c.save();c.translate(x,y);c.rotate(a+Math.PI/2);c.globalAlpha=.98;c.drawImage(img,-itemSize/2,-itemSize/2,itemSize,itemSize);c.restore()}index++}left-=n;ring++}
-  if(imgs.butterfly){const b=imgs.butterfly;const maxW=190,maxH=170;const scale=Math.min(maxW/b.naturalWidth,maxH/b.naturalHeight);const bw=b.naturalWidth*scale,bh=b.naturalHeight*scale;c.drawImage(b,610-bw/2,515-bh/2,bw,bh);}
-  // Gratitude list on the right
-  c.textAlign='left';c.fillStyle='#405d45';c.font='600 27px "Trebuchet MS",Arial,sans-serif';c.fillText('Gratitude List',1060,235);
-  const entries=[...gratitude.entries()];let y=275;c.font='16px "Trebuchet MS",Arial,sans-serif';entries.forEach(([key,text],i)=>{const boxH=54; c.fillStyle='rgba(255,253,247,.92)';c.strokeStyle='rgba(112,139,107,.35)';c.lineWidth=1;c.beginPath();c.roundRect(1050,y,470,boxH,12);c.fill();c.stroke();c.fillStyle='#70886f';c.font='700 16px Arial,sans-serif';c.fillText((i+1)+'.',1070,y+32);c.fillStyle='#4b624e';c.font='16px "Trebuchet MS",Arial,sans-serif';const words=String(text).split(/\s+/);let line='',lines=[];for(const word of words){const test=line?line+' '+word:word;if(c.measureText(test).width>420){lines.push(line);line=word}else line=test}if(line)lines.push(line);lines.slice(0,2).forEach((ln,j)=>c.fillText(ln,1100,y+23+j*18));y+=boxH+10;});
-  c.textAlign='center';c.fillStyle='#536955';c.font='italic 18px "Trebuchet MS",Arial,sans-serif';c.fillText('A little garden made from what you noticed.',640,900);
+
+  const listX=1050;
+  const listWidth=470;
+  const listTop=275;
+  const boxPadding=18;
+  const textWidth=listWidth-70;
+  const lineHeight=21;
+  const boxGap=12;
+
+  c.font='16px "Trebuchet MS",Arial,sans-serif';
+
+  const wrappedEntries=entries.map(([key,text],i)=>{
+    const words=String(text).split(/\s+/);
+    const lines=[];
+    let line='';
+
+    for(const word of words){
+      const test=line?line+' '+word:word;
+      if(c.measureText(test).width>textWidth){
+        if(line)lines.push(line);
+        line=word;
+      }else{
+        line=test;
+      }
+    }
+    if(line)lines.push(line);
+
+    return {key,lines:lines.length?lines:[''],number:i+1};
+  });
+
+  const listHeight=wrappedEntries.reduce((total,item)=>{
+    const boxHeight=Math.max(58,item.lines.length*lineHeight+boxPadding*2);
+    return total+boxHeight+boxGap;
+  },0);
+
+  const bottomPadding=110;
+  out.height=Math.max(1000,listTop+listHeight+bottomPadding);
+
+  const bg=c.createLinearGradient(0,0,0,out.height);
+  bg.addColorStop(0,'#edf3e5');
+  bg.addColorStop(.58,'#dce9d5');
+  bg.addColorStop(1,'#cbdcc2');
+  c.fillStyle=bg;
+  c.fillRect(0,0,out.width,out.height);
+
+  const glow=c.createRadialGradient(800,120,20,800,120,430);
+  glow.addColorStop(0,'rgba(255,248,205,.72)');
+  glow.addColorStop(1,'rgba(255,248,205,0)');
+  c.fillStyle=glow;
+  c.fillRect(0,0,out.width,520);
+
+  c.textAlign='center';
+  c.fillStyle='#36543d';
+  c.font='500 52px "Trebuchet MS",Arial,sans-serif';
+  c.fillText('Your little garden',640,72);
+
+  c.font='italic 24px "Trebuchet MS",Arial,sans-serif';
+  c.fillStyle='#536955';
+  c.fillText('The things you noticed along the way.',640,108);
+
+  const count=getAllCollectedItems().length;
+  c.font='600 18px Arial,sans-serif';
+  c.fillStyle='#4b674f';
+  c.fillText(count+(count===1?' thing you noticed along the way':' things you noticed along the way'),640,145);
+
+  c.strokeStyle='rgba(104,132,97,.18)';
+  c.lineWidth=2;
+  c.beginPath();
+  c.arc(610,515,250,0,Math.PI*2);
+  c.stroke();
+
+  const items=getExportItems();
+  const total=items.length;
+  const size=Math.max(42,Math.min(78,82-total*.55));
+  let left=total,index=0,ring=0;
+
+  const imgs={
+    leaf:await loadImage('leaf.png'),
+    flower:await loadImage('flower.png'),
+    ginkgo:await loadImage('ginkgo.png'),
+    oak:await loadImage('oak.png'),
+    butterfly:await loadImage('butterfly.png')
+  };
+
+  while(left>0){
+    const n=Math.min(left,ring===0?8:Math.min(18,8+ring*6));
+    const radius=62+ring*43;
+
+    for(let j=0;j<n;j++){
+      const item=items[index];
+      const a=-Math.PI/2+(j/n)*Math.PI*2+(ring%2?Math.PI/n:0);
+      const img=imgs[item.type];
+      const itemSize=item.type==='flower'?size*1.18:size;
+      const x=610+Math.cos(a)*radius;
+      const y=515+Math.sin(a)*radius;
+
+      if(img){
+        c.save();
+        c.translate(x,y);
+        c.rotate(a+Math.PI/2);
+        c.globalAlpha=.98;
+        c.drawImage(img,-itemSize/2,-itemSize/2,itemSize,itemSize);
+        c.restore();
+      }
+      index++;
+    }
+    left-=n;
+    ring++;
+  }
+
+  if(imgs.butterfly){
+    const b=imgs.butterfly;
+    const maxW=190,maxH=170;
+    const scale=Math.min(maxW/b.naturalWidth,maxH/b.naturalHeight);
+    const bw=b.naturalWidth*scale,bh=b.naturalHeight*scale;
+    c.drawImage(b,610-bw/2,515-bh/2,bw,bh);
+  }
+
+  c.textAlign='left';
+  c.fillStyle='#405d45';
+  c.font='600 27px "Trebuchet MS",Arial,sans-serif';
+  c.fillText('Gratitude List',listX+10,235);
+
+  let y=listTop;
+
+  wrappedEntries.forEach(item=>{
+    const boxHeight=Math.max(58,item.lines.length*lineHeight+boxPadding*2);
+
+    c.fillStyle='rgba(255,253,247,.94)';
+    c.strokeStyle='rgba(112,139,107,.35)';
+    c.lineWidth=1;
+    c.beginPath();
+    c.roundRect(listX,y,listWidth,boxHeight,12);
+    c.fill();
+    c.stroke();
+
+    c.fillStyle='#70886f';
+    c.font='700 16px Arial,sans-serif';
+    c.fillText(item.number+'.',listX+20,y+boxPadding+15);
+
+    c.fillStyle='#4b624e';
+    c.font='16px "Trebuchet MS",Arial,sans-serif';
+
+    item.lines.forEach((line,lineIndex)=>{
+      c.fillText(line,listX+50,y+boxPadding+15+lineIndex*lineHeight);
+    });
+
+    y+=boxHeight+boxGap;
+  });
+
+  c.textAlign='center';
+  c.fillStyle='#536955';
+  c.font='italic 18px "Trebuchet MS",Arial,sans-serif';
+  c.fillText('A little garden made from what you noticed.',640,out.height-50);
+
   return out;
 }
-async function downloadGardenJpg(){const out=await makeGardenExportCanvas();const a=document.createElement('a');a.download='my-gratitude-garden.jpg';a.href=out.toDataURL('image/jpeg',.94);a.click();}
-async function downloadGardenPdf(){const out=await makeGardenExportCanvas();if(!window.jspdf||!window.jspdf.jsPDF){alert('PDF export needs an internet connection to load the PDF tool.');return}const {jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:'landscape',unit:'px',format:[1600,1000]});pdf.addImage(out.toDataURL('image/jpeg',.94),'JPEG',0,0,1600,1000);pdf.save('my-gratitude-garden.pdf');}
+
+async function downloadGardenJpg(){
+  const out=await makeGardenExportCanvas();
+  const a=document.createElement('a');
+  a.download='my-gratitude-garden.jpg';
+  a.href=out.toDataURL('image/jpeg',.94);
+  a.click();
+}
+
+async function downloadGardenPdf(){
+  const out=await makeGardenExportCanvas();
+
+  if(!window.jspdf||!window.jspdf.jsPDF){
+    alert('PDF export needs an internet connection to load the PDF tool.');
+    return;
+  }
+
+  const {jsPDF}=window.jspdf;
+
+  const pdf=new jsPDF({
+    orientation:'landscape',
+    unit:'px',
+    format:[out.width,out.height]
+  });
+
+  pdf.addImage(
+    out.toDataURL('image/jpeg',.94),
+    'JPEG',
+    0,
+    0,
+    out.width,
+    out.height
+  );
+
+  pdf.save('my-gratitude-garden.pdf');
+}
+
 function reset(showWelcome=false){resizeCanvas();seed=Math.floor(Math.random()*1e9);chunks.clear();collected.clear();gratitude.clear();leafCells.clear();flowerCells.clear();ginkgoCells.clear();oakCells.clear();collectedFlowers.clear();collectedGinkgo.clear();collectedOak.clear();player={x:0,y:4};facing='right';paused=false;activeLeaf=null;activeCollectibleType=null;modal.classList.remove('show');document.getElementById('leafIcon').src='leaf.png';document.querySelector('#modal h2').textContent='A leaf for you';welcomeModal.classList.toggle('show',showWelcome);getChunk(0);getChunk(1);getChunk(2);getChunk(3);showMaze();draw()}
 function showMaze(){completePage.classList.remove('show');mazePage.style.display='block';bottomBar.style.display='flex'}function showDone(){if(paused)return;mazePage.style.display='none';bottomBar.style.display='none';completePage.classList.add('show');renderGarden()}
 document.getElementById('skip').onclick=()=>closePrompt(false);document.getElementById('save').onclick=()=>closePrompt(true);const bgMusic=document.getElementById('bgMusic');
