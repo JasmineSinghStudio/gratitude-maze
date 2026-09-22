@@ -25,10 +25,13 @@ body{
 }
 header{
   padding:20px 30px 17px; display:flex; justify-content:space-between;
-  align-items:center; gap:24px; background:#eef4e8;
+  align-items:center; gap:30px; background:#eef4e8;
 }
-h1{margin:0;font-size:clamp(30px,4vw,48px);font-weight:500;letter-spacing:.01em}
-.motto{font-size:19px;font-style:italic;max-width:500px;text-align:right;line-height:1.4;letter-spacing:.01em}
+.title-wrap{display:flex;align-items:center;gap:14px;min-width:0;flex:1 1 auto}
+.title-copy{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.title-leaf{width:46px;height:46px;object-fit:contain;flex:0 0 auto}
+h1{margin:0;font-size:clamp(30px,3.5vw,42px);font-weight:500;letter-spacing:.01em;white-space:nowrap;line-height:1.05}
+.motto{font-size:16px;font-style:italic;max-width:560px;text-align:right;line-height:1.35;letter-spacing:.01em;white-space:nowrap;flex:0 0 auto}
 .board{position:relative;background:#dcebd7}
 canvas{display:block;width:100%;height:auto}
 .bottom{
@@ -185,35 +188,40 @@ textarea:focus{border-color:#708871;box-shadow:0 0 0 3px rgba(112,136,113,.12)}
   display:inline-block;background:rgba(255,253,247,.75);
   font:600 14px Arial,sans-serif;color:#4b674f;
 }
-.garden{
-  width:min(800px,90%);height:275px;margin:4px auto 0;position:relative;
+.mandala{
+  width:min(620px,88%);height:370px;margin:12px auto 0;position:relative;
+  display:block;
 }
-.stem{
-  position:absolute;left:50%;top:8px;bottom:0;width:13px;
-  transform:translateX(-50%);border-radius:12px;
-  background:linear-gradient(90deg,#567d4a,#759b59,#466b40);
-  box-shadow:inset 2px 0 rgba(255,255,255,.2);
+.mandala::before{
+  content:"";position:absolute;left:50%;top:50%;width:290px;height:290px;
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,253,247,.58) 0 38%,rgba(255,253,247,.18) 39% 68%,transparent 69%);
+  border:1px solid rgba(104,132,97,.16);
+}
+.mandala-center{
+  position:absolute;left:50%;top:50%;width:118px;height:118px;
+  transform:translate(-50%,-50%);border-radius:50%;
+  display:grid;place-items:center;background:rgba(239,246,230,.9);
+  border:1px solid rgba(104,132,97,.24);box-shadow:0 5px 18px rgba(57,82,57,.10);z-index:4;
 }
 .finish-leaf{
-  position:absolute;width:84px;height:84px;object-fit:contain;
-  transform-origin:50% 100%;
-  filter:drop-shadow(0 4px 5px rgba(42,73,38,.15));
+  position:absolute;width:70px;height:70px;object-fit:contain;
+  left:50%;top:50%;transform-origin:50% 50%;
+  filter:drop-shadow(0 3px 4px rgba(42,73,38,.13));z-index:3;
+  cursor:default;
 }
-.finish-leaf.left{transform:rotate(-35deg)}
-.finish-leaf.right{transform:scaleX(-1) rotate(-35deg)}
 .eater{
-  position:absolute;width:185px;height:auto;object-fit:contain;
-  right:7%;top:88px;
-  animation:chew 1.25s ease-in-out infinite;
-  filter:drop-shadow(0 8px 5px rgba(42,73,38,.15));
+  position:relative;width:104px;height:auto;object-fit:contain;
+  right:auto;top:auto;animation:chew 1.25s ease-in-out infinite;
+  filter:drop-shadow(0 6px 4px rgba(42,73,38,.15));
 }
 @keyframes chew{
   0%,100%{transform:translateX(0) rotate(-1deg)}
-  50%{transform:translateX(-13px) rotate(1deg)}
+  50%{transform:translateX(-7px) rotate(1deg)}
 }
 .empty-note{
   position:absolute;inset:0;display:grid;place-items:center;
-  color:#5e715f;font-size:18px;font-style:italic;
+  color:#5e715f;font-size:18px;font-style:italic;z-index:5;
 }
 .garden-wrap{position:relative;z-index:1}
 .reflection{width:min(650px,88%);margin:-2px auto 0;text-align:center;position:relative;z-index:2}
@@ -232,7 +240,7 @@ textarea:focus{border-color:#708871;box-shadow:0 0 0 3px rgba(112,136,113,.12)}
   color:#405843;font:600 14px Arial,sans-serif;
 }
 @media(max-width:720px){
-  header{padding:16px 18px}.motto{display:none}
+  header{padding:16px 18px}.motto{display:none}.title-leaf{width:38px;height:38px}.title-wrap{gap:10px} h1{font-size:clamp(27px,7vw,38px)}
   .bottom{flex-direction:column;gap:9px;padding:10px 14px}
   .bottom .controls{width:100%;justify-content:center;flex-wrap:wrap}
   .bottom .arrow{display:none}
@@ -241,7 +249,7 @@ textarea:focus{border-color:#708871;box-shadow:0 0 0 3px rgba(112,136,113,.12)}
   .hint{text-align:center;font-size:12px}
   .new,.done{margin-left:4px;padding:10px 17px}
   .eater{width:160px;right:-8px}
-  .complete-head{padding-top:22px}.complete-head h2{font-size:34px}.garden{height:220px}.eater{width:145px;right:2%;top:70px}.finish-leaf{width:68px;height:68px}.reflection-title{font-size:21px}.thoughts{max-height:58px}.complete-actions{margin-top:9px}
+  .complete-head{padding-top:22px}.complete-head h2{font-size:34px}.mandala{height:310px;width:94%}.mandala::before{width:235px;height:235px}.mandala-center{width:88px;height:88px}.finish-leaf{width:54px;height:54px}.eater{width:78px}.reflection-title{font-size:21px}.thoughts{max-height:58px}.complete-actions{margin-top:9px}
 }
 
 /* Unified playful-but-grown-up type system */
@@ -273,8 +281,13 @@ textarea:focus{border-color:#708871;box-shadow:0 0 0 3px rgba(112,136,113,.12)}
 <body>
 <div class="game">
   <header>
-    <h1>The Gratitude Maze</h1>
-    <div class="byline">By Jasmine Singh Studio</div>
+    <div class="title-wrap">
+      <img class="title-leaf" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI1LjIuMywgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxMjggMTI4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxMjggMTI4OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIHN0eWxlPSJmaWxsOiM1Qjk4MjE7IiBkPSJNODQuNSwzNy44OWMwLDAtMTAuOTUsMi44OS0yNi4xOSwyNS43NWMtMTEuNzcsMTcuNjUtMTIuOTUsMzEuNDgtMjIuOCw0MC43NQoJYy01LjAxLDQuNzEtMTMuMDksNy45NC0xMy4wOSw3Ljk0cy02LjQ3LTAuMTUtNi45MSwwLjE1Yy0wLjQ0LDAuMjktMS43MywzLjUzLDAuNjksNy41MWMyLDMuMjksNS4wNSw0LjEyLDYuMDgsNC4yNgoJYzEuMDMsMC4xNSwyLjk0LTQuMjcsMy42OC00Ljg2YzAuNzQtMC41OSw5LjQzLTMuOTMsMTUuNi0xMC43NGMxMi42NS0xMy45OCwxMi40NS0yNi4xMSwyMS42My00Mi4wOAoJYzEwLjE1LTE3LjY1LDIyLjY2LTI2LjE5LDIyLjY2LTI2LjE5TDg0LjUsMzcuODl6Ii8+CjxwYXRoIHN0eWxlPSJmaWxsOiM1Qjk4MjE7IiBkPSJNMTIyLjY5LDMuMzljLTAuMzktMC40My0yNS4zNC0wLjA1LTM4LjE1LDExLjUyYy0xNS4yMiwxMy43NC0xMS4xLDMyLjc2LTExLjEsMzIuNzYKCXMxNy43Nyw0LjIxLDMxLjE4LTcuOTNDMTIwLjI2LDI1LjU5LDEyMy4wOCwzLjgyLDEyMi42OSwzLjM5eiIvPgo8cGF0aCBzdHlsZT0iZmlsbDojNUI5ODIxOyIgZD0iTTcyLjQsNzAuNDljMC44MiwwLjY0LDIsMS4zOSwzLjY5LDIuMjNjOS41Niw0Ljc4LDIxLjUsMi4xNiwyNy4zNS0wLjE2CgljOC4xMy0zLjIzLDIwLjIxLTEyLjk1LDIwLjIxLTEzLjY5YzAtMC43NC01LjUtMy4zOC0xMy4zMi01LjcxYy03LjgyLTIuMzMtMTguMjctMi40NC0yNi4yMSwwLjk1CgljLTcuMjgsMy4xMS0xMC42Nyw4LjU4LTEyLjU0LDExLjg2YzAsMC0yLjksMC40Ni01LDAuODJjLTMuNywwLjYzLTYuNTUsMS45LTYuNTUsMS45bC0yLjg1LDUuOTJjMCwwLDUuODEtMi42NCw4Ljc3LTMuMjgKCVM3Mi40LDcwLjQ5LDcyLjQsNzAuNDl6Ii8+CjxwYXRoIHN0eWxlPSJmaWxsOiM1Qjk4MjE7IiBkPSJNNTQuMzEsOC43M2MtMC45MywwLjE5LTUuMzMsNy4wNi04LjAzLDEzLjYzYy0yLjEzLDUuMTctNC4yNiwxOC4zOC0wLjQ1LDI2LjUyczguMjIsOS42OCw4LjIyLDkuNjgKCXMwLjU0LDIuMzcsMC40OCw1LjU1Yy0wLjAzLDEuOC0wLjIxLDYuNzYtMC4yMSw2Ljc2bDQuMzUtMS44OWMwLDAsMC4yOS00LjE2LDAuMjctNi4xOGMtMC4wMy0yLjEzLTAuMjktNC44Mi0wLjI5LTQuODIKCXM3LjE5LTYuNzMsNy43Mi0xNy4xOGMwLjQyLTguMjQtMC40Ni0xNS44OS01LTI0LjE0QzU3LjgxLDEwLjIzLDU0Ljg0LDguNjMsNTQuMzEsOC43M3oiLz4KPHBhdGggc3R5bGU9ImZpbGw6IzVCOTgyMTsiIGQ9Ik01LjgsMjQuOTVjLTEuMDgsMS4yMywxLjM3LDQuMzMsMS41OSwxMS4zMWMwLjE3LDUuNzEsMS4xNiwyNS4wNSw2Ljg3LDM0Ljk4CglzMTMuNjMsMTIuMzcsMTYuMTcsMTMuMjFjMi41NCwwLjg1LDguMDMsMC45NSw4LjAzLDAuOTVzMi4zMywyLjAxLDMuMTcsNC44NmMwLjg1LDIuODUsMS42OSw3LjA4LDEuNjksNy4wOGw0LjAyLTUuOTIKCWMwLDAtMS4xNi00LjY1LTIuMzMtNi43NmMtMS4xNi0yLjExLTEuNTktMi44NS0xLjU5LTIuODVzMi41Ny0xNS45OS0xLjgtMjkuMTdDMzYuNDUsMzcsMjcuNTcsMzEuMDgsMTkuMzMsMjcuNTkKCVM2LjU0LDI0LjExLDUuOCwyNC45NXoiLz4KPHBhdGggc3R5bGU9ImZpbGw6IzVCOTgyMTsiIGQ9Ik01MC4zLDkzLjAxYzAsMCwxLjg5LTEuMTUsNS4yNy0xLjIzYzMuMTEtMC4wNyw1LjA0LDAuNTEsNS4wNCwwLjUxczUuODEtNi42NywxMi4zMS04LjU4CgljNi4xMy0xLjgsMTQuMjItMy40MSwyOC40NywyLjVjMTQuMjcsNS45MiwyMi40NywxMS42NiwyMi4zNywxMy40NmMtMC4xMSwxLjgtMTQuMTMsOC4yMi0xOS45NCwxMC4yMgoJYy01LjgxLDIuMDEtMTkuMTQsNi4yMy0zMS42NCwxLjRjLTkuOTMtMy44NC0xMi4xNS0xMy0xMi4xNS0xM3MtMi4zLTEuMjctNC45NC0xLjEyYy00LjgzLDAuMjYtOC45LDMuODctOC45LDMuODdMNTAuMyw5My4wMXoiLz4KPHBhdGggc3R5bGU9ImZpbGw6IzhEQzAyQzsiIGQ9Ik03Ny45NywzOC43MmMxLjU3LDAuOTcsNS41LTguODgsOS4zLTEzLjQyczEwLjg5LTkuMTksMTAuMTUtMTEuMnMtOS4wOSwwLjg1LTE0LjgsOC4yNAoJQzc2LjkyLDI5Ljc0LDc2LjYsMzcuODgsNzcuOTcsMzguNzJ6Ii8+CjxwYXRoIHN0eWxlPSJmaWxsOiM4REMwMkM7IiBkPSJNNzkuMDQsNjMuNTNjMS4xNCwxLjU3LDYuMzctMi4xNywxMS42My0zLjM4YzUuNDEtMS4yNSwxMS4yLDAuNTEsMTAuOTktMi40MwoJYy0wLjItMi43OC03LjkzLTMuMDYtMTMtMS42OUM4My41OSw1Ny40LDc3LjY3LDYxLjYyLDc5LjA0LDYzLjUzeiIvPgo8cGF0aCBzdHlsZT0iZmlsbDojOERDMDJDOyIgZD0iTTUwLjUxLDQ4LjU4YzEuOTMtMC4wOCwxLjI3LTYuMDIsMS4zNy0xMS42M3MxLjA2LTE0LjA2LTEuMDYtMTQuMTZjLTIuMTEtMC4xMS0zLjg5LDUuNDctNC4wMiwxMi4xNQoJQzQ2LjcsNDAuNDQsNDcuOTcsNDguNjgsNTAuNTEsNDguNTh6Ii8+CjxwYXRoIHN0eWxlPSJmaWxsOiM4REMwMkM7IiBkPSJNMTIuMTQsMzguMDZjLTEuMjcsMC40Mi0wLjM3LDMuMzgtMC4zMiw0Ljc2YzAuMzIsOS4wOSwzLjM4LDIzLjE1LDguMzUsMjkuMjgKCWMzLjg2LDQuNzYsOC4yNCw4LjI0LDExLjIsNi4xM2MyLjk2LTIuMTEtMi42Ny02LjY3LTUuNS0xMS4yYy00LjU0LTcuMjktNy40LTE2LjU5LTguODgtMjEuMTRTMTQuNTMsMzcuMjYsMTIuMTQsMzguMDZ6Ii8+CjxwYXRoIHN0eWxlPSJmaWxsOiM4REMwMkQ7IiBkPSJNNjcuNDEsOTIuMDRjMC4xOSwyLjc3LDYuMjEsMS4zMiwxMi41OSwwLjY5czExLjYzLTEuNTEsMTEuMzgtMy44NWMtMC4yMy0yLjE4LTcuMzYtMi40MS0xMi45OS0yLjAxCglDNzIuNzYsODcuMjcsNjcuMjQsODkuNTcsNjcuNDEsOTIuMDR6Ii8+Cjwvc3ZnPgo=" alt="">
+      <div class="title-copy">
+        <h1>The Gratitude Maze</h1>
+        <div class="byline">By Jasmine Singh Studio</div>
+      </div>
+    </div>
     <div class="motto">There is nowhere you need to get to, just keep wandering.</div>
   </header>
 
@@ -327,10 +340,11 @@ textarea:focus{border-color:#708871;box-shadow:0 0 0 3px rgba(112,136,113,.12)}
       <div class="leaf-count" id="leafCount">0 things you noticed along the way</div>
     </div>
     <div class="garden-wrap">
-      <div class="garden" id="garden">
-        <div class="stem"></div>
+      <div class="mandala" id="garden">
         <div class="empty-note" id="emptyNote">No leaves yet. Keep wandering. 🌱</div>
-        <img class="eater" id="eater" alt="caterpillar">
+        <div class="mandala-center">
+          <img class="eater" id="eater" alt="caterpillar">
+        </div>
       </div>
       <div class="reflection" id="reflection">
         <div class="thoughts" id="thoughts"></div>
@@ -568,6 +582,13 @@ textarea:focus{border-color:#708871;box-shadow:0 0 0 3px rgba(112,136,113,.12)}
       e.preventDefault();
       move(map[e.key]);
     }
+    // While the gratitude prompt is open, Enter submits it just like “Leave it here”.
+    // Shift+Enter still inserts a new line in the textarea.
+    if(e.key==="Enter" && paused && modal.classList.contains("show") && !e.shiftKey){
+      e.preventDefault();
+      closePrompt(true);
+      return;
+    }
     if(e.key==="Escape"&&paused)closePrompt(false);
   });
 
@@ -733,20 +754,47 @@ textarea:focus{border-color:#708871;box-shadow:0 0 0 3px rgba(112,136,113,.12)}
       thoughts.appendChild(item);
     });
 
-    if(count){
-      const max=Math.min(count,12);
-      for(let i=0;i<max;i++){
-        const leaf=document.createElement("img");
-        leaf.className="finish-leaf "+(i%2?"right":"left");
-        leaf.src=LEAF_SRC;
-        const y=25+i*(300/Math.max(1,max-1));
-        leaf.style.top=y+"px";
-        leaf.style.left=`calc(50% ${i%2?" + ":" - "} ${48+((i%3)*3)}px)`;
-        leaf.style.animation=`leafSway ${1.7+(i%4)*.18}s ease-in-out infinite`;
-        leaf.style.animationDelay=(i*.08)+"s";
-        garden.appendChild(leaf);
-      }
+    if(!count)return;
+
+    // Arrange every collected leaf in concentric rings around the caterpillar,
+    // inspired by a botanical mandala rather than a vertical stem.
+    const total=entries.length;
+    const centerX=50, centerY=50;
+    const rings=[];
+    let remaining=total, ring=0;
+    while(remaining>0){
+      const capacity=ring===0?8:Math.min(18,8+ring*6);
+      const take=Math.min(remaining,capacity);
+      rings.push(take);
+      remaining-=take;
+      ring++;
     }
+    const ringRadii=rings.map((_,i)=>62+i*43);
+    const size=Math.max(42,Math.min(72,78-total*0.75));
+
+    let index=0;
+    rings.forEach((n,r)=>{
+      const radius=ringRadii[r];
+      for(let j=0;j<n;j++){
+        const angle=(-Math.PI/2)+(j/n)*Math.PI*2+(r%2?Math.PI/n:0);
+        const leaf=document.createElement("img");
+        leaf.className="finish-leaf";
+        leaf.src=LEAF_SRC;
+        leaf.alt="Gratitude leaf";
+        leaf.title=entries[index]||"";
+        leaf.style.width=size+"px";
+        leaf.style.height=size+"px";
+        leaf.style.left=`calc(50% + ${Math.cos(angle)*radius}px - ${size/2}px)`;
+        leaf.style.top=`calc(50% + ${Math.sin(angle)*radius}px - ${size/2}px)`;
+        // Rotate each leaf outward so the collection reads as one botanical form.
+        const outward=angle+Math.PI/2;
+        leaf.style.transform=`rotate(${outward}rad)`;
+        leaf.style.animation=`leafSway ${1.7+(index%4)*.18}s ease-in-out infinite`;
+        leaf.style.animationDelay=(index*.05)+"s";
+        garden.appendChild(leaf);
+        index++;
+      }
+    });
   }
 
   // Gentle leaf sway on the completion page.
